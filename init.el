@@ -18,12 +18,14 @@ values."
    ;; of a list then all discovered layers will be installed.
    dotspacemacs-configuration-layers
    '(
+     ruby
      (auto-completion :variables
                       auto-completion-enable-help-tooltip t
                       auto-completion-enable-sort-by-usage t)
      syntax-checking
      themes-megapack
      better-defaults
+     (colors :variables colors-enable-rainbow-identifiers t)
 
      ;; Programming Languages
      c-c++
@@ -45,7 +47,9 @@ values."
      restclient
 
      ;; Tools
+     platformio
      ansible
+     docker
      git
 
      ;; fun stuff
