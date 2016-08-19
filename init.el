@@ -359,6 +359,7 @@ you should place you code here."
                     (interactive)
                     (split-window-horizontally)
                     (other-window 1)))
+  (delete-selection-mode t)
 
   )
 
