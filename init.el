@@ -40,11 +40,13 @@ values."
      markdown
      org
      yaml
+     csv
 
      ;; Web
      html
      react
      restclient
+     nginx
 
      ;; Tools
      platformio
