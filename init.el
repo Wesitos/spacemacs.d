@@ -318,6 +318,18 @@ you should place you code here."
    js-indent-level 2
    js2-strict-trailing-comma-warning nil
    )
+  ;; https://emacs.stackexchange.com/questions/21205/flycheck-with-file-relative-eslint-executable
+  (defun use-eslint-from-node-modules ()
+    (let* ((root (locate-dominating-file
+                  (or (buffer-file-name) default-directory)
+                  "node_modules"))
+           (eslint (and root
+                        (expand-file-name "node_modules/eslint/bin/eslint.js"
+                                          root))))
+      (when (and eslint (file-executable-p eslint))
+        (setq-local flycheck-javascript-eslint-executable eslint))))
+
+  (add-hook 'js2-mode-hook 'use-eslint-from-node-modules)
 
   ;; Web-mode
   (setq-default
@@ -327,6 +339,7 @@ you should place you code here."
    web-mode-code-indent-offset 2
    web-mode-attr-indent-offset 2
    )
+  (add-hook 'react-mode-hook 'use-eslint-from-node-modules)
 
   ;; Python
   (setq-default
