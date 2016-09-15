@@ -50,6 +50,7 @@ values."
 
      ;; Tools
      platformio
+     ipython-notebook
      ansible
      docker
      git
