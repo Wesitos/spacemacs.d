@@ -401,7 +401,8 @@ you should place you code here."
  '(js2-indent-switch-body t)
  '(js2-mode-assume-strict t)
  '(js2-mode-show-strict-warnings nil)
- '(magit-commit-arguments (quote ("--gpg-sign=75D9D625ABF40969"))))
+ '(magit-commit-arguments (quote ("--gpg-sign=75D9D625ABF40969")))
+ '(magit-log-arguments (quote ("--graph" "--decorate" "--show-signature" "-n256"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
