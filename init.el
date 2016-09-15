@@ -319,17 +319,29 @@ you should place you code here."
    js2-strict-trailing-comma-warning nil
    )
   ;; https://emacs.stackexchange.com/questions/21205/flycheck-with-file-relative-eslint-executable
-  (defun use-eslint-from-node-modules ()
+  (defun use-linter-from-node-modules (linter-name exec-path)
     (let* ((root (locate-dominating-file
                   (or (buffer-file-name) default-directory)
                   "node_modules"))
-           (eslint (and root
-                        (expand-file-name "node_modules/eslint/bin/eslint.js"
-                                          root))))
-      (when (and eslint (file-executable-p eslint))
-        (setq-local flycheck-javascript-eslint-executable eslint))))
+           (linter (and root
+                        (expand-file-name
+                         (concat (file-name-as-directory "node_modules")
+                                 exec-path)
+                         root))))
+      (when (and linter (file-executable-p linter))
+        (set (make-local-variable
+              (intern (concat "flycheck-" linter-name "-executable"))) linter))))
 
-  (add-hook 'js2-mode-hook 'use-eslint-from-node-modules)
+  (add-hook 'js2-mode-hook
+            (lambda ()
+              (use-linter-from-node-modules
+               "javascript-eslint"
+               "eslint/bin/eslint.js")))
+  (add-hook 'scss-mode-hook
+            (lambda ()
+              (use-linter-from-node-modules
+               "sass/scss-sass-lint"
+               "sass-lint/bin/sass-lint.js")))
 
   ;; Web-mode
   (setq-default
