@@ -317,7 +317,8 @@ you should place you code here."
   (setq-default
    js2-basic-offset 2
    js-indent-level 2
-   js2-strict-trailing-comma-warning nil
+   js2-mode-show-strict-warnings nil
+   js2-mode-show-parse-errors nil
    )
   ;; https://emacs.stackexchange.com/questions/21205/flycheck-with-file-relative-eslint-executable
   (defun use-linter-from-node-modules (linter-name exec-path)
