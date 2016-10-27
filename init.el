@@ -333,12 +333,16 @@ you should place you code here."
       (when (and linter (file-executable-p linter))
         (set (make-local-variable
               (intern (concat "flycheck-" linter-name "-executable"))) linter))))
+  (defun use-eslint-from-node-modules ()
+    (use-linter-from-node-modules
+     "javascript-eslint"
+     "eslint/bin/eslint.js"))
 
-  (add-hook 'js2-mode-hook
-            (lambda ()
-              (use-linter-from-node-modules
-               "javascript-eslint"
-               "eslint/bin/eslint.js")))
+  ;; ESlint
+  (add-hook 'js2-mode-hook use-eslint-from-node-modules)
+  (add-hook 'js-mode-hook use-eslint-from-node-modules)
+  (add-hook 'react-mode-hook use-eslint-from-node-modules)
+
   (add-hook 'scss-mode-hook
             (lambda ()
               (use-linter-from-node-modules
@@ -353,8 +357,6 @@ you should place you code here."
    web-mode-code-indent-offset 2
    web-mode-attr-indent-offset 2
    )
-  (add-hook 'react-mode-hook 'use-eslint-from-node-modules)
-
   ;; Python
   (setq-default
    python-shell-interpreter "python3.5"
