@@ -339,9 +339,9 @@ you should place you code here."
      "eslint/bin/eslint.js"))
 
   ;; ESlint
-  (add-hook 'js2-mode-hook use-eslint-from-node-modules)
-  (add-hook 'js-mode-hook use-eslint-from-node-modules)
-  (add-hook 'react-mode-hook use-eslint-from-node-modules)
+  (add-hook 'js2-mode-hook 'use-eslint-from-node-modules)
+  (add-hook 'js-mode-hook 'use-eslint-from-node-modules)
+  (add-hook 'react-mode-hook 'use-eslint-from-node-modules)
 
   (add-hook 'scss-mode-hook
             (lambda ()
