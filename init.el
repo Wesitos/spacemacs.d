@@ -37,11 +37,15 @@ values."
      extra-langs
 
      ;; Non-programming languages
-     latex
      markdown
      org
      yaml
      csv
+     raml
+
+     ;; Documents
+     latex
+     bibtex
 
      ;; Web
      html
