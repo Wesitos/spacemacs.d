@@ -363,7 +363,15 @@ you should place you code here."
    web-mode-css-indent-offset 2
    web-mode-code-indent-offset 2
    web-mode-attr-indent-offset 2
+   emmet-self-closing-tag-style " /"
+   emmet-indentation 2
    )
+  (use-package emmet-mode
+    :defer t
+    :config
+    (progn
+      (unbind-key "<emacs-state> TAB" emmet-mode-keymap)
+      (unbind-key "<emacs-state> <tab>" emmet-mode-keymap)))
   ;; Python
   (setq-default
    python-shell-interpreter "python3.5"
