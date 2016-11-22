@@ -377,6 +377,10 @@ you should place you code here."
    python-shell-interpreter "python3.5"
    )
 
+  ;; Expand Region
+  (setq-default
+   expand-region-fast-keys-enabled nil
+   )
 
   ;; Smart parens global mode
   (smartparens-global-mode t)
