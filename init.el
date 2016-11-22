@@ -282,24 +282,31 @@ you should place you code here."
    user-full-name "Pedro Palacios Avila"
    user-mail-address "pedro_gpa@hotmail.com")
   ;; File lookup
-  (require 'helm-config)
-  (require 'helm-projectile)
-  (defun helm-overlord (&rest arg)
-    ;; just in case someone decides to pass an argument, helm-omni won't fail.
-    (interactive)
-    (helm-other-buffer
-     (append ;; projectile errors out if you're not in a project
-      (when (projectile-project-p) ;; so look before you leap
-        '(helm-source-projectile-buffers-list
-          helm-source-projectile-recentf-list
-          helm-source-projectile-files-list)
-        ) ;; files in current directory
-      '(helm-source-buffers-list ;; list of all open buffers
-        helm-source-recentf ;; all recent files
-        helm-source-files-in-current-dir
-        helm-source-bookmarks ;; bookmarks too
-        helm-source-buffer-not-found)) ;; ask to create a buffer otherwise
-     "*all-seeing-eye*"))
+  (use-package helm-projectile
+    :defer t
+    :commands (helm-overlord)
+    :init
+    (global-set-key (kbd "C-c o") 'helm-overlord)
+    :config
+    (progn
+      (defun helm-overlord (&rest arg)
+      ;; just in case someone decides to pass an argument, helm-omni won't fail.
+      (interactive)
+      (helm-other-buffer
+       (append ;; projectile errors out if you're not in a project
+        (when (projectile-project-p) ;; so look before you leap
+          '(helm-source-projectile-buffers-list
+            helm-source-projectile-recentf-list
+            helm-source-projectile-files-list)
+          ) ;; files in current directory
+        '(helm-source-buffers-list ;; list of all open buffers
+          helm-source-recentf ;; all recent files
+          helm-source-files-in-current-dir
+          helm-source-bookmarks ;; bookmarks too
+          helm-source-buffer-not-found)) ;; ask to create a buffer otherwise
+       "*all-seeing-eye*"))
+      )
+    )
 
   ;; Org config
   ;; Fontify org-mode code blocks
@@ -377,8 +384,6 @@ you should place you code here."
   (global-set-key (kbd "M-h") 'mark-paragraph)
   ;; <menu> key
   (global-set-key (kbd "<menu>") 'helm-M-x)
-  ;; File lookup
-  (global-set-key (kbd "C-c o") 'helm-overlord)
   ;; prevent madness
   (global-set-key (kbd "C-x 2")
                   (lambda ()
