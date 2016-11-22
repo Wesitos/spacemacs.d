@@ -348,19 +348,19 @@ you should place you code here."
   (defun use-eslint-from-node-modules ()
     (use-linter-from-node-modules
      "javascript-eslint"
-     "eslint/bin/eslint.js"))
+     ".bin/eslint"))
 
   ;; ESlint
   (add-hook 'js2-mode-hook 'use-eslint-from-node-modules)
   (add-hook 'js-mode-hook 'use-eslint-from-node-modules)
-  (add-hook 'react-mode-hook 'use-eslint-from-node-modules)
 
   (add-hook 'scss-mode-hook
             (lambda ()
               (use-linter-from-node-modules
                "sass/scss-sass-lint"
                "sass-lint/bin/sass-lint.js")))
-
+  (setq-default
+   flycheck-eslintrc ".eslintrc*")
   ;; Web-mode
   (setq-default
    css-indent-offset 2
