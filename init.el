@@ -369,11 +369,20 @@ you should place you code here."
    python-shell-interpreter "python3.5"
    )
 
+
+  ;; Smart parens global mode
+  (smartparens-global-mode t)
+
   ;; ------Smart parens bindings------
   ;; Delete
   (define-key sp-keymap (kbd "C-k") 'sp-kill-hybrid-sexp)
   (define-key sp-keymap (kbd "M-<backspace>") 'sp-backward-unwrap-sexp)
   (define-key sp-keymap (kbd "C-M-<backspace>") 'sp-splice-sexp-killing-backward)
+  (define-key sp-keymap (kbd "C-M-f") 'sp-forward-sexp)
+  (define-key sp-keymap (kbd "C-M-b") 'sp-backward-sexp)
+  (define-key sp-keymap (kbd "C-M-d") 'sp-down-sexp)
+  (define-key sp-keymap (kbd "C-M-a") 'sp-beginning-of-sexp)
+  (define-key sp-keymap (kbd "C-M-e") 'sp-up-sexp)
   ;; Move parens
   (define-key sp-keymap (kbd "<C-right>") 'sp-forward-slurp-sexp)
   (define-key sp-keymap (kbd "<C-left>") 'sp-backward-slurp-sexp)
