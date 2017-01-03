@@ -18,15 +18,18 @@ values."
    ;; of a list then all discovered layers will be installed.
    dotspacemacs-configuration-layers
    '(
-     ruby
+
      (auto-completion :variables
                       auto-completion-enable-snippets-in-popup t
                       auto-completion-enable-help-tooltip t
                       auto-completion-enable-sort-by-usage t)
      syntax-checking
+     (spell-checking :variables
+                     enable-flyspell-auto-completion nil)
      themes-megapack
      better-defaults
-     (colors :variables colors-enable-rainbow-identifiers t)
+     (colors :variables
+             colors-enable-rainbow-identifiers t)
 
      ;; Programming Languages
      c-c++
@@ -34,6 +37,7 @@ values."
      emacs-lisp
      javascript
      python
+     ruby
      extra-langs
 
      ;; Non-programming languages
@@ -138,7 +142,7 @@ values."
                          zenburn)
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
-   ;; Default font. `powerline-scale' allows to quickly tweak the mode-line
+   ;; Default font. `powerline-Scale' Allows to quickly tweak the mode-line
    ;; size to make separators look not too crappy.
    dotspacemacs-default-font '("Source Code Pro"
                                :size 13
@@ -286,6 +290,15 @@ you should place you code here."
   (setq
    user-full-name "Pedro Palacios Avila"
    user-mail-address "pedro_gpa@hotmail.com")
+
+  ;; Ispell config
+  (with-eval-after-load "ispell"
+    (setq-default ispell-program-name "hunspell"
+                  ispell-dictionary "castellano,english"
+                  )
+    (ispell-set-spellchecker-params)
+    (ispell-hunspell-add-multi-dic "castellano,english"))
+  (list-load-path-shadows)
   ;; File lookup
   (use-package helm-projectile
     :defer t
@@ -329,6 +342,8 @@ you should place you code here."
   (setq-default
    js2-basic-offset 2
    js-indent-level 2
+   js2-mode-assume-strict t
+   js-switch-indent-offset 2
    js2-mode-show-strict-warnings nil
    js2-mode-show-parse-errors nil
    )
@@ -382,6 +397,11 @@ you should place you code here."
    python-shell-interpreter "python3.5"
    )
 
+  ;; Matlab
+  (setq-default
+   matlab-shell-command-switches '(-nodesktop -nosplash)
+   )
+
   ;; Expand Region
   (setq-default
    expand-region-fast-keys-enabled nil
@@ -422,24 +442,29 @@ you should place you code here."
                     (split-window-horizontally)
                     (other-window 1)))
   (delete-selection-mode t)
-
   )
 
-;; Do not write anything past this comment. This is where Emacs will
-;; auto-generate custom variable definitions.
+(defun dotspacemacs/emacs-custom-settings ()
+  "Emacs custom settings.
+This is an auto-generated function, do not modify its content directly, use
+Emacs customize menu instead.
+This function is called at the very end of Spacemacs initialization."
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(js2-indent-switch-body t)
- '(js2-mode-assume-strict t)
- '(js2-mode-show-strict-warnings nil)
  '(magit-commit-arguments (quote ("--gpg-sign=75D9D625ABF40969")))
- '(magit-log-arguments (quote ("--graph" "--decorate" "--show-signature" "-n256"))))
+ '(magit-log-arguments (quote ("--graph" "--decorate" "--show-signature" "-n256")))
+ '(safe-local-variable-values
+   (quote
+    ((ispell-dictionary . "castellano,english")
+     (ispell-dictionary . "castellano")
+     (ispell-dictionary . "english")))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+)
