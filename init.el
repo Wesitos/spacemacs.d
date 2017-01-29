@@ -63,6 +63,7 @@ values."
      ansible
      docker
      git
+     systemd
 
      ;; fun stuff
      xkcd
