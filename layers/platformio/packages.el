@@ -34,7 +34,6 @@
     platformio-mode
     company
     irony
-    eldoc
     irony-eldoc
     company-irony
     flycheck
@@ -90,34 +89,30 @@ Each entry is either:
     :if (configuration-layer/package-usedp 'company)
     :defer t
     :init
-    (progn 
+    (progn
       (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
-      (spacemacs|diminish irony-mode " ⓘ" " i"))))
+      (spacemacs|diminish irony-mode " ⓘ" " i")
+      )))
 
 (defun platformio/init-irony-eldoc ()
   (use-package irony-eldoc
     :if (configuration-layer/package-usedp 'eldoc)
     :defer t))
 
-(when (configuration-layer/layer-usedp 'auto-completion)
+(defun platformio/post-init-company ())
 
-  ;; Hook company to python-mode
-  (defun platformio/post-init-company ()
-    (spacemacs|add-company-hook platformio-mode))
+(when (configuration-layer/layer-usedp 'auto-completion)
 
   ;; Add the backend to the major-mode specific backend list
   (defun platformio/init-company-irony ()
     (use-package company-irony
       :if (configuration-layer/package-usedp 'company)
       :defer t
-      :init (push 'company-irony company-backends-platformio-mode))))
-
-(defun platformio/init-company-irony ()
-  (use-package company-irony
-    :if (configuration-layer/package-usedp 'company)
-    :defer t
-    :init
-    (push 'company-irony company-backends-platformio-mode)))
+      :init
+      (spacemacs|add-company-backends
+        :backends company-irony
+        :modes platformio-mode)
+       )))
 
 (defun platformio/init-flycheck-irony ()
   (use-package flycheck-irony
