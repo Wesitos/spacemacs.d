@@ -13,15 +13,19 @@ values."
    dotspacemacs-distribution 'spacemacs
    ;; List of additional paths where to look for configuration layers.
    ;; Paths must have a trailing slash (i.e. `~/.mycontribs/')
-   dotspacemacs-configuration-layer-path '()
+   dotspacemacs-configuration-layer-path '("~/.spacemacs.d/private/")
    ;; List of configuration layers to load. If it is the symbol `all' instead
    ;; of a list then all discovered layers will be installed.
    dotspacemacs-configuration-layers
    '(
-
+     php
+     better-defaults
      (auto-completion :variables
+                      auto-completion-return-key-behavior nil
+                      auto-completion-tab-key-behavior 'complete
                       auto-completion-enable-snippets-in-popup t
                       auto-completion-enable-help-tooltip t
+                      auto-completion-complete-with-key-sequence-delay 0.2
                       auto-completion-enable-sort-by-usage t)
      syntax-checking
      (spell-checking :variables
@@ -32,20 +36,26 @@ values."
              colors-enable-rainbow-identifiers t)
 
      ;; Programming Languages
-     c-c++
+     (c-c++ :variables c-c++-enable-clang-support t)
      clojure
      emacs-lisp
-     javascript
+     major-modes
+     (javascript :variables javascript-disable-tern-port-files nil)
      python
      ruby
-     extra-langs
+     sql
 
      ;; Non-programming languages
      markdown
-     org
      yaml
      csv
      raml
+
+     ;; Give order to life
+     (org :variables org-enable-reveal-js-support t)
+     calendar
+     wakatime
+     wesitos-gcal ;; Gcal configuration
 
      ;; Documents
      latex
@@ -64,6 +74,8 @@ values."
      docker
      git
      systemd
+     gnus
+     (shell :variables shell-default-shell 'multi-term)
 
      ;; fun stuff
      xkcd
@@ -79,6 +91,8 @@ values."
    dotspacemacs-additional-packages
    '(
      editorconfig
+     graphql-mode
+     (yasnippet :location elpa)
      )
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
@@ -125,10 +139,10 @@ values."
    ;; List of items to show in the startup buffer. If nil it is disabled.
    ;; Possible values are: `recents' `bookmarks' `projects'.
    ;; (default '(recents projects))
-   dotspacemacs-startup-lists '(recents projects)
-   ;; Number of recent files to show in the startup buffer. Ignored if
-   ;; `dotspacemacs-startup-lists' doesn't include `recents'. (default 5)
-   dotspacemacs-startup-recent-list-size 5
+   dotspacemacs-startup-lists '((recents . 7)
+                                (projects . 5))
+   ;; True if the home buffer should respond to resize events.
+   dotspacemacs-startup-buffer-responsive t
    ;; Default major mode of the scratch buffer (default `text-mode')
    dotspacemacs-scratch-mode 'text-mode
    ;; List of themes, the first of the list is loaded when spacemacs starts.
@@ -152,6 +166,9 @@ values."
                                :powerline-scale 1.1)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
+   ;; The key used for Emacs commands (M-x) (after pressing on the leader key).
+   ;; (default "SPC")
+   dotspacemacs-emacs-command-key "SPC"
    ;; The leader key accessible in `emacs state' and `insert state'
    ;; (default "M-m")
    dotspacemacs-emacs-leader-key "M-m"
@@ -183,7 +200,11 @@ values."
    dotspacemacs-display-default-layout nil
    ;; If non nil then the last auto saved layouts are resume automatically upon
    ;; start. (default nil)
-   dotspacemacs-auto-resume-layouts nil
+   dotspacemacs-auto-resume-layouts t
+   ;; Size (in MB) above which spacemacs will prompt to open the large file
+   ;; literally to avoid performance issues. Opening a file literally means that
+   ;; no major mode or minor modes are active. (default is 1)
+   dotspacemacs-large-file-size 1
    ;; Location where to auto-save files. Possible values are `original' to
    ;; auto-save the file in-place, `cache' to auto-save the file to another
    ;; file stored in the cache directory and `nil' to disable auto-saving.
@@ -191,10 +212,6 @@ values."
    dotspacemacs-auto-save-file-location 'cache
    ;; Maximum number of rollback slots to keep in the cache. (default 5)
    dotspacemacs-max-rollback-slots 5
-   ;; If non nil then `ido' replaces `helm' for some commands. For now only
-   ;; `find-files' (SPC f f), `find-spacemacs-file' (SPC f e s), and
-   ;; `find-contrib-file' (SPC f e c) are replaced. (default nil)
-   dotspacemacs-use-ido nil
    ;; If non nil, `helm' will try to minimize the space it uses. (default nil)
    dotspacemacs-helm-resize nil
    ;; if non nil, the helm header is hidden when there is only one source.
@@ -203,12 +220,17 @@ values."
    ;; define the position to display `helm', options are `bottom', `top',
    ;; `left', or `right'. (default 'bottom)
    dotspacemacs-helm-position 'bottom
+   ;; Controls fuzzy matching in helm. If set to `always', force fuzzy matching
+   ;; in all non-asynchronous sources. If set to `source', preserve individual
+   ;; source settings. Else, disable fuzzy matching in all sources.
+   ;; (default 'always)
+   dotspacemacs-helm-use-fuzzy 'always
    ;; If non nil the paste micro-state is enabled. When enabled pressing `p`
    ;; several times cycle between the kill ring content. (default nil)
    dotspacemacs-enable-paste-micro-state nil
    ;; Which-key delay in seconds. The which-key buffer is the popup listing
    ;; the commands bound to the current keystroke sequence. (default 0.4)
-   dotspacemacs-which-key-delay 0.4
+   dotspacemacs-which-key-delay 0.3
    ;; Which-key frame position. Possible values are `right', `bottom' and
    ;; `right-then-bottom'. right-then-bottom tries to display the frame to the
    ;; right; if there is insufficient space it displays it at the bottom.
@@ -220,22 +242,26 @@ values."
    dotspacemacs-loading-progress-bar t
    ;; If non nil the frame is fullscreen when Emacs starts up. (default nil)
    ;; (Emacs 24.4+ only)
-   dotspacemacs-fullscreen-at-startup nil
+   dotspacemacs-fullscreen-at-startup t
    ;; If non nil `spacemacs/toggle-fullscreen' will not use native fullscreen.
    ;; Use to disable fullscreen animations in OSX. (default nil)
    dotspacemacs-fullscreen-use-non-native nil
    ;; If non nil the frame is maximized when Emacs starts up.
    ;; Takes effect only if `dotspacemacs-fullscreen-at-startup' is nil.
    ;; (default nil) (Emacs 24.4+ only)
-   dotspacemacs-maximized-at-startup t
+   dotspacemacs-maximized-at-startup nil
    ;; A value from the range (0..100), in increasing opacity, which describes
    ;; the transparency level of a frame when it's active or selected.
    ;; Transparency can be toggled through `toggle-transparency'. (default 90)
-   dotspacemacs-active-transparency 90
+   dotspacemacs-active-transparency 97
    ;; A value from the range (0..100), in increasing opacity, which describes
    ;; the transparency level of a frame when it's inactive or deselected.
    ;; Transparency can be toggled through `toggle-transparency'. (default 90)
-   dotspacemacs-inactive-transparency 90
+   dotspacemacs-inactive-transparency 97
+   ;; If non nil show the titles of transient states. (default t)
+   dotspacemacs-show-transient-state-title t
+   ;; If non nil show the color guide hint for transient state keys. (default t)
+   dotspacemacs-show-transient-state-color-guide t
    ;; If non nil unicode symbols are displayed in the mode line. (default t)
    dotspacemacs-mode-line-unicode-symbols t
    ;; If non nil smooth scrolling (native-scrolling) is enabled. Smooth
@@ -246,9 +272,16 @@ values."
    ;; derivatives. If set to `relative', also turns on relative line numbers.
    ;; (default nil)
    dotspacemacs-line-numbers t
+   ;; Code folding method. Possible values are `evil' and `origami'.
+   ;; (default 'evil)
+   dotspacemacs-folding-method 'evil
    ;; If non-nil smartparens-strict-mode will be enabled in programming modes.
    ;; (default nil)
    dotspacemacs-smartparens-strict-mode nil
+   ;; If non-nil pressing the closing parenthesis `)' key in insert mode passes
+   ;; over any automatically added closing parenthesis, bracket, quote, etc…
+   ;; This can be temporary disabled by pressing `C-q' before `)'. (default nil)
+   dotspacemacs-smart-closing-parenthesis nil
    ;; Select a scope to highlight delimiters. Possible values are `any',
    ;; `current', `all' or `nil'. Default is `all' (highlight any scope and
    ;; emphasis the current one). (default 'all)
@@ -279,7 +312,11 @@ executes.
  This function is mostly useful for variables that need to be set
 before packages are loaded. If you are unsure, you should try in setting them in
 `dotspacemacs/user-config' first."
-  )
+  (setq
+   custom-file "~/.spacemacs.d/.custom-settings"
+   ;; Avoid using helm when completing at point
+   ;; helm-mode-handle-completion-in-region nil
+   ))
 
 (defun dotspacemacs/user-config ()
   "Configuration function for user code.
@@ -290,7 +327,55 @@ explicitly specified that a variable should be set before a package is loaded,
 you should place you code here."
   (setq
    user-full-name "Pedro Palacios Avila"
-   user-mail-address "pedro_gpa@hotmail.com")
+   user-mail-address "wesitos@makerlabperu.org")
+
+  ;; GPG related options
+  (setq
+   magit-commit-arguments '("--gpg-sign=75D9D625ABF40969")
+   magit-log-arguments '("--graph" "--decorate" "--show-signature" "-n256")
+   )
+
+  ;; Gnus
+  (setq gnus-secondary-select-methods
+        '(
+          (nnimap "mkl-mail"
+                  (nnimap-address
+                   "imap.makerlabperu.org")
+                  (nnimap-inbox "INBOX")
+                  (nnimap-server-port "imaps")
+                  (nnimap-stream ssl))
+          ))
+
+  ;; Outbound server
+  (setq message-send-mail-function 'smtpmail-send-it
+        smtpmail-default-smtp-server "smtp.makerlabperu.org")
+
+  (setq gnus-message-archive-method '(nnimap "imap.makerlabperu.org")
+        gnus-message-archive-group "[MKL]/Sent Mail")
+
+  ;; set return email address based on incoming email address
+  (setq gnus-posting-styles
+        '(((header "to" "wesitos@makerlabperu.org")
+           (address "wesitos@makerlabperu.org"))
+          (((header "to" "admin@makerlabperu.org")
+            (address "admin@makerlabperu.org")))
+          ))
+
+  (setq nnml-directory "~/mail/gnus/")
+  (setq message-directory "~/mail/gnus/")
+
+  ;; set-mark bug on emacs 25.1 workaround... in theory
+  (require 'ansible-doc)
+
+  ;; Avoid calling autocompletion-in-region
+  (with-eval-after-load "company"
+    (define-key spacemacs-js2-mode-map-root-map
+      (kbd "<tab>") 'company-indent-or-complete-common)
+    (define-key spacemacs-react-mode-map-root-map
+      (kbd "<tab>") 'company-indent-or-complete-common)
+    )
+
+  (with-eval-after-load "js2")
 
   ;; Ispell config
   (with-eval-after-load "ispell"
@@ -300,30 +385,26 @@ you should place you code here."
     (ispell-set-spellchecker-params)
     (ispell-hunspell-add-multi-dic "castellano,english"))
   (list-load-path-shadows)
+
   ;; File lookup
   (use-package helm-projectile
     :defer t
     :commands (helm-overlord)
     :init
-    (global-set-key (kbd "C-c o") 'helm-overlord)
+    (global-set-key (kbd "C-c o") 'helm-for-files)
     :config
     (progn
-      (defun helm-overlord (&rest arg)
-      ;; just in case someone decides to pass an argument, helm-omni won't fail.
-      (interactive)
-      (helm-other-buffer
-       (append ;; projectile errors out if you're not in a project
-        (when (projectile-project-p) ;; so look before you leap
-          '(helm-source-projectile-buffers-list
-            helm-source-projectile-recentf-list
-            helm-source-projectile-files-list)
-          ) ;; files in current directory
-        '(helm-source-buffers-list ;; list of all open buffers
-          helm-source-recentf ;; all recent files
-          helm-source-files-in-current-dir
-          helm-source-bookmarks ;; bookmarks too
-          helm-source-buffer-not-found)) ;; ask to create a buffer otherwise
-       "*all-seeing-eye*"))
+      (setq helm-for-files-preferred-list
+            '(helm-source-buffers-list
+              helm-source-projectile-projects
+              helm-source-projectile-buffers-list
+              helm-source-projectile-files-list
+              helm-source-recentf
+              helm-source-bookmarks
+              helm-source-file-cache
+              helm-source-files-in-current-dir
+              helm-source-locate
+              ))
       )
     )
 
@@ -331,13 +412,73 @@ you should place you code here."
   ;; Fontify org-mode code blocks
   (setq-default
    org-src-fontify-natively t
-   ;; org-mode: Don't ruin S-arrow to switch windows please (use M-+ and M-- instead to toggle)
+   ;; org-mode: Don't ruin S-arrow to switch windows please (use M-+ and M--
+   ;; instead to toggle)
    org-replace-disputed-keys t
    org-hide-leading-stars t
    org-odd-levels-only t
+   org-ref-default-bibliography '("references.bib")
+   reftex-default-bibliography '("references.bib")
    ;; TODO progress logging stuff
    org-log-done 'time
+   org-latex-listings 'minted
+   org-latex-compiler "xelatex"
+   org-latex-pdf-process'("latexmk -pdf -f -pdflatex='xelatex --shell-escape -file-line-error -interaction=nonstopmode' -outdir=%o %f")
+   org-latex-default-packages-alist '(
+                                      ;; Not used with XeLaTeX
+                                      ("AUTO" "inputenc" t ("pdflatex"))
+                                      ("T1" "fontenc" t ("pdflatex"))
+                                      ("" "fontspec" t ("xelatex"))
+                                      ("" "polyglossia" t ("xelatex"))
+                                      ("" "graphicx" t)
+                                      ("" "grffile" t)
+                                      ("" "longtable" nil)
+                                      ("" "wrapfig" nil)
+                                      ("" "rotating" nil)
+                                      ("normalem" "ulem" t)
+                                      ("" "amsmath" t)
+                                      ("" "textcomp" t)
+                                      ("" "amssymb" t)
+                                      ("" "capt-of" nil)
+                                      ("" "hyperref" nil)
+                                      ("dvipsnames" "xcolor")
+                                      )
+   ;; Agenda and clock
+   org-clock-persist 'history
+   spaceline-org-clock-p t ;; Always show org clock in modeline
    )
+
+  (with-eval-after-load 'org
+    (org-clock-persistence-insinuate)
+    (defun refresh-org-agenda-files ()
+      (interactive)
+      (load-library "find-lisp")
+      (setq org-agenda-files (find-lisp-find-files "~/org/agenda" "\.org$"))
+      )
+    (refresh-org-agenda-files)
+
+    (add-to-list 'org-latex-packages-alist '("" "minted"))
+    (defun toggle-org-reveal-export-on-save ()
+      (interactive)
+      (if (memq 'org-reveal-export-to-html after-save-hook)
+          (progn
+            (remove-hook 'after-save-hook 'org-reveal-export-to-html t)
+            (message "Disabled org reveal export on save for current buffer..."))
+        (if (memq 'org-reveal-export-current-subtree after-save-hook)
+            (remove-hook 'after-save-hook 'org-reveal-export-current-subtree t))
+        (add-hook 'after-save-hook 'org-reveal-export-to-html nil t)
+        (message "Enabled org reveal export on save for current buffer...")))
+    (defun toggle-org-reveal-export-subtree-on-save ()
+      (interactive)
+      (if (memq 'org-reveal-export-current-subtree after-save-hook)
+          (progn
+            (remove-hook 'after-save-hook 'org-reveal-export-current-subtree t)
+            (message "Disabled org reveal export current subtree on save for current buffer..."))
+        (if (memq 'org-reveal-export-to-html after-save-hook)
+            (remove-hook 'after-save-hook 'org-reveal-export-to-html t))
+        (add-hook 'after-save-hook 'org-reveal-export-current-subtree nil t)
+        (message "Enabled org reveal export current subtree save for current buffer...")))
+    )
 
   ;; Javascript
   (setq-default
@@ -349,34 +490,43 @@ you should place you code here."
    js2-mode-show-parse-errors nil
    )
   ;; https://emacs.stackexchange.com/questions/21205/flycheck-with-file-relative-eslint-executable
-  (defun use-linter-from-node-modules (linter-name exec-path)
-    (let* ((root (locate-dominating-file
-                  (or (buffer-file-name) default-directory)
-                  "node_modules"))
-           (linter (and root
-                        (expand-file-name
-                         (concat (file-name-as-directory "node_modules")
-                                 exec-path)
-                         root))))
-      (when (and linter (file-executable-p linter))
-        (set (make-local-variable
-              (intern (concat "flycheck-" linter-name "-executable"))) linter))))
-  (defun use-eslint-from-node-modules ()
-    (use-linter-from-node-modules
-     "javascript-eslint"
-     ".bin/eslint"))
+  (with-eval-after-load 'flycheck
+    (defun use-linter-from-node-modules (linter-name exec-path)
+      (let* ((root (locate-dominating-file
+                    (or (buffer-file-name) default-directory)
+                    "node_modules"))
+             (linter (and root
+                          (expand-file-name
+                           (concat (file-name-as-directory "node_modules")
+                                   exec-path)
+                           root))))
+        (when (and linter (file-executable-p linter))
+          (set (make-local-variable
+                (intern (concat "flycheck-" linter-name "-executable"))) linter))))
+    (defun use-eslint-from-node-modules ()
+      (use-linter-from-node-modules
+       "javascript-eslint"
+       ".bin/eslint"))
+    ;; ESlint
+    (add-hook 'js2-mode-hook 'use-eslint-from-node-modules)
+    (add-hook 'js-mode-hook 'use-eslint-from-node-modules)
 
-  ;; ESlint
-  (add-hook 'js2-mode-hook 'use-eslint-from-node-modules)
-  (add-hook 'js-mode-hook 'use-eslint-from-node-modules)
+    (add-hook 'scss-mode-hook
+              (lambda ()
+                (use-linter-from-node-modules
+                 "sass/scss-sass-lint"
+                 "sass-lint/bin/sass-lint.js")))
+    )
 
-  (add-hook 'scss-mode-hook
-            (lambda ()
-              (use-linter-from-node-modules
-               "sass/scss-sass-lint"
-               "sass-lint/bin/sass-lint.js")))
+  ;; GraphQL
+  (use-package graphql-mode
+    :ensure t
+    :diminish graphql-mode
+    :mode "\\.graphql\\'"
+    )
   (setq-default
    flycheck-eslintrc ".eslintrc*")
+
   ;; Web-mode
   (setq-default
    css-indent-offset 2
@@ -393,14 +543,15 @@ you should place you code here."
     (progn
       (unbind-key "<emacs-state> TAB" emmet-mode-keymap)
       (unbind-key "<emacs-state> <tab>" emmet-mode-keymap)))
+
   ;; Python
   (setq-default
-   python-shell-interpreter "python3.5"
+   python-shell-interpreter "ipython3"
    )
 
   ;; Matlab
   (setq-default
-   matlab-shell-command-switches '(-nodesktop -nosplash)
+   matlab-shell-command-switches '("-nodesktop" "-nosplash")
    )
 
   ;; Expand Region
@@ -409,7 +560,7 @@ you should place you code here."
    )
 
   ;; Smart parens global mode
-  (smartparens-global-mode t)
+  (spacemacs/toggle-smartparens-globally-on)
 
   ;; ------Smart parens bindings------
   ;; Delete
@@ -443,29 +594,17 @@ you should place you code here."
                     (split-window-horizontally)
                     (other-window 1)))
   (delete-selection-mode t)
+
+  (setq
+   safe-local-variable-values
+   '(
+     (encoding . utf-8)
+     (encoding . utf8)
+     (org-latex-minted-options '(("bgcolor=MonokaiBg")))
+     (org-latex-minted-options quote
+                               (("bgcolor" "MonokaiBg")))
+     (ispell-dictionary . "castellano,english")
+     (ispell-dictionary . "castellano")
+     (ispell-dictionary . "english")))
   )
 
-(defun dotspacemacs/emacs-custom-settings ()
-  "Emacs custom settings.
-This is an auto-generated function, do not modify its content directly, use
-Emacs customize menu instead.
-This function is called at the very end of Spacemacs initialization."
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(magit-commit-arguments (quote ("--gpg-sign=75D9D625ABF40969")))
- '(magit-log-arguments (quote ("--graph" "--decorate" "--show-signature" "-n256")))
- '(safe-local-variable-values
-   (quote
-    ((ispell-dictionary . "castellano,english")
-     (ispell-dictionary . "castellano")
-     (ispell-dictionary . "english")))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-)

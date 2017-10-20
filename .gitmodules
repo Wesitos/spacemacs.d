@@ -1,0 +1,3 @@
+[submodule "calendar-layer"]
+	path = layers/calendar
+	url = https://github.com/dudelson/spacemacs-calendar-layer.git

@@ -34,10 +34,11 @@
     platformio-mode
     company
     irony
-    irony-eldoc
-    company-irony
+    projectile
+    (irony-eldoc :toogle (configuration-layer/package-usedp 'eldoc))
+    (company-irony :toogle (configuration-layer/package-usedp 'company))
     flycheck
-    flycheck-irony
+    (flycheck-irony :toogle (configuration-layer/package-usedp 'flycheck))
     )
   "The list of Lisp packages required by the platformio layer.
 
@@ -73,14 +74,12 @@ Each entry is either:
     :init
     (add-hook 'c++-mode-hook
               (lambda ()
-                (when (and (platformio-conditionally-enable)
-                         (configuration-layer/layer-usedp 'auto-completion))
-                  (irony-mode)
-                  (irony-eldoc)
-                  )))
+                (irony-mode t)
+                (irony-eldoc t)
+                (platformio-conditionally-enable)
+                ))
     :config
     (progn
-      (platformio-setup-compile-buffer)
       (spacemacs|diminish platformio-mode " ⒫" " p"))
     ))
 
@@ -96,17 +95,19 @@ Each entry is either:
 
 (defun platformio/init-irony-eldoc ()
   (use-package irony-eldoc
-    :if (configuration-layer/package-usedp 'eldoc)
     :defer t))
 
 (defun platformio/post-init-company ())
+
+(defun platformio/post-init-projectile ()
+  (add-to-list 'projectile-project-root-files "platformio.ini")
+  )
 
 (when (configuration-layer/layer-usedp 'auto-completion)
 
   ;; Add the backend to the major-mode specific backend list
   (defun platformio/init-company-irony ()
     (use-package company-irony
-      :if (configuration-layer/package-usedp 'company)
       :defer t
       :init
       (spacemacs|add-company-backends
@@ -116,13 +117,12 @@ Each entry is either:
 
 (defun platformio/init-flycheck-irony ()
   (use-package flycheck-irony
-    :if (configuration-layer/package-usedp 'flycheck)
     :defer t
     :init
     (eval-after-load 'flycheck
       '(add-hook 'flycheck-mode-hook 'flycheck-irony-setup))))
 
 (defun platformio/post-init-flycheck ()
-  (spacemacs/add-flycheck-hook 'platformio-mode-hook))
+  (spacemacs/enable-flycheck 'platformio-mode))
 
 ;;; packages.el ends here
