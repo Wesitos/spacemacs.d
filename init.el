@@ -29,6 +29,7 @@ values."
                       auto-completion-enable-sort-by-usage t)
      syntax-checking
      (spell-checking :variables
+                     spell-checking-enable-by-default nil
                      enable-flyspell-auto-completion nil)
      themes-megapack
      better-defaults
@@ -159,11 +160,11 @@ values."
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font. `powerline-Scale' Allows to quickly tweak the mode-line
    ;; size to make separators look not too crappy.
-   dotspacemacs-default-font '("Source Code Pro"
-                               :size 13
-                               :weight normal
-                               :width normal
-                               :powerline-scale 1.1)
+   dotspacemacs-default-font '("Fira Mono"
+                              :size 13
+                              :weight normal
+                              :width normal
+                              :powerline-scale 1.0)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The key used for Emacs commands (M-x) (after pressing on the leader key).
@@ -335,6 +336,14 @@ you should place you code here."
    magit-log-arguments '("--graph" "--decorate" "--show-signature" "-n256")
    )
 
+  ;; Mode line
+  (setq
+   spaceline-battery-p nil
+   spaceline-org-clock-p t
+   spaceline-hud-p nil
+   )
+  (spacemacs/toggle-mode-line-battery-on)
+
   ;; Gnus
   (setq gnus-secondary-select-methods
         '(
@@ -445,7 +454,6 @@ you should place you code here."
                                       )
    ;; Agenda and clock
    org-clock-persist 'history
-   spaceline-org-clock-p t ;; Always show org clock in modeline
    )
 
   (with-eval-after-load 'org
@@ -594,6 +602,8 @@ you should place you code here."
                     (split-window-horizontally)
                     (other-window 1)))
   (delete-selection-mode t)
+
+  (global-wakatime-mode t)
 
   (setq
    safe-local-variable-values
