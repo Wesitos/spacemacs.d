@@ -20,6 +20,7 @@ values."
    '(
      php
      better-defaults
+     helm
      (auto-completion :variables
                       auto-completion-return-key-behavior nil
                       auto-completion-tab-key-behavior 'complete
@@ -497,34 +498,33 @@ you should place you code here."
    js2-mode-show-strict-warnings nil
    js2-mode-show-parse-errors nil
    )
-  ;; https://emacs.stackexchange.com/questions/21205/flycheck-with-file-relative-eslint-executable
-  (with-eval-after-load 'flycheck
-    (defun use-linter-from-node-modules (linter-name exec-path)
-      (let* ((root (locate-dominating-file
-                    (or (buffer-file-name) default-directory)
-                    "node_modules"))
-             (linter (and root
-                          (expand-file-name
-                           (concat (file-name-as-directory "node_modules")
-                                   exec-path)
-                           root))))
-        (when (and linter (file-executable-p linter))
-          (set (make-local-variable
-                (intern (concat "flycheck-" linter-name "-executable"))) linter))))
-    (defun use-eslint-from-node-modules ()
-      (use-linter-from-node-modules
-       "javascript-eslint"
-       ".bin/eslint"))
-    ;; ESlint
-    (add-hook 'js2-mode-hook 'use-eslint-from-node-modules)
-    (add-hook 'js-mode-hook 'use-eslint-from-node-modules)
 
-    (add-hook 'scss-mode-hook
-              (lambda ()
-                (use-linter-from-node-modules
-                 "sass/scss-sass-lint"
-                 "sass-lint/bin/sass-lint.js")))
-    )
+  ;; https://emacs.stackexchange.com/questions/21205/flycheck-with-file-relative-eslint-executable
+  (defun use-linter-from-node-modules (linter-name exec-path)
+    (let* ((root (locate-dominating-file
+                  (or (buffer-file-name) default-directory)
+                  "node_modules"))
+           (linter (and root
+                        (expand-file-name
+                         (concat (file-name-as-directory "node_modules")
+                                 exec-path)
+                         root))))
+      (when (and linter (file-executable-p linter))
+        (set (make-local-variable
+              (intern (concat "flycheck-" linter-name "-executable"))) linter))))
+  (defun use-eslint-from-node-modules ()
+    (use-linter-from-node-modules
+     "javascript-eslint"
+     ".bin/eslint"))
+  ;; ESlint
+  (add-hook 'js2-mode-hook 'use-eslint-from-node-modules)
+  (add-hook 'react-mode-hook 'use-eslint-from-node-modules)
+
+  (add-hook 'scss-mode-hook
+            (lambda ()
+              (use-linter-from-node-modules
+               "sass/scss-sass-lint"
+               "sass-lint/bin/sass-lint.js")))
 
   ;; GraphQL
   (use-package graphql-mode
@@ -617,4 +617,3 @@ you should place you code here."
      (ispell-dictionary . "castellano")
      (ispell-dictionary . "english")))
   )
-
