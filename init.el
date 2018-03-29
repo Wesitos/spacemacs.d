@@ -574,12 +574,27 @@ you should place you code here."
       (unbind-key "<emacs-state> <tab>" emmet-mode-keymap)))
 
   ;; Python
-  (setq-default
-   python-shell-interpreter "ipython3"
-   )
 
+  (use-package pipenv
+    :ensure t
+    :init
+    (progn
+      (setq
+     pipenv-projectile-after-switch-function
+     #'pipenv-projectile-after-switch-extended)
+      (spacemacs|diminish pipenv-mode "🎁" "p")
+      )
+    :config
+    (add-hook 'python-mode-hook
+              #'(lambda ()
+                  (setq flycheck-checker 'python-pylint)
+                  (pipenv-mode)))
+    )
+  (spacemacs|diminish anaconda-mode "🐍" "a")
   ;; Matlab
   (setq-default
+   pipenv-with-flycheck t
+   pipenv-with-projectile t
    matlab-shell-command-switches '("-nodesktop" "-nosplash")
    )
 
