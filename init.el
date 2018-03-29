@@ -42,10 +42,10 @@ values."
      clojure
      emacs-lisp
      major-modes
-     (javascript :variables javascript-disable-tern-port-files nil)
+     javascript
      python
      ruby
-     sql
+     (sql :variables sql-capitalize-keywords t)
 
      ;; Non-programming languages
      markdown
@@ -53,7 +53,7 @@ values."
      csv
      raml
 
-     ;; Give order to life
+     ;; Bring order to life
      (org :variables org-enable-reveal-js-support t)
      calendar
      wakatime
@@ -70,6 +70,7 @@ values."
      nginx
 
      ;; Tools
+     floobits
      platformio
      ipython-notebook
      ansible
@@ -95,6 +96,7 @@ values."
      editorconfig
      graphql-mode
      (yasnippet :location elpa)
+     pipenv
      )
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
