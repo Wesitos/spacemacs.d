@@ -96,7 +96,6 @@ values."
      editorconfig
      graphql-mode
      (yasnippet :location elpa)
-     pipenv
      )
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '()
@@ -578,20 +577,21 @@ you should place you code here."
   ;; Python
 
   (use-package pipenv
-    :ensure t
-    :init
+    :defer t
+    :config
     (progn
       (setq
-     pipenv-projectile-after-switch-function
-     #'pipenv-projectile-after-switch-extended)
+       pipenv-projectile-after-switch-function
+       #'pipenv-projectile-after-switch-extended)
       (spacemacs|diminish pipenv-mode "🎁" "p")
-      )
-    :config
-    (add-hook 'python-mode-hook
-              #'(lambda ()
-                  (setq flycheck-checker 'python-pylint)
-                  (pipenv-mode)))
-    )
+      (add-hook 'python-mode-hook
+                #'(lambda ()
+                    (setq flycheck-checker 'python-pylint)
+                    (pipenv-mode)))
+      ))
+
+  (use-package importmagie
+   )
   (spacemacs|diminish anaconda-mode "🐍" "a")
   ;; Matlab
   (setq-default
