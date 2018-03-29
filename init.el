@@ -640,7 +640,9 @@ you should place you code here."
   (delete-selection-mode t)
 
   (global-wakatime-mode t)
+  (spacemacs|diminish wakatime-mode "🕑" "w")
 
+  (spacemacs|diminish holy-mode "✝️" "h")
   (setq
    safe-local-variable-values
    '(
