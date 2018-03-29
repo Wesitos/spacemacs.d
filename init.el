@@ -357,6 +357,13 @@ you should place you code here."
    )
   (spacemacs/toggle-mode-line-battery-on)
 
+  ;; Dired
+  ;; Load Dired X when Dired is loaded.
+  (require 'dired-x)
+  (setq-default dired-omit-files-p t) ; Buffer-local variable
+  (setq dired-omit-files (concat "^\\.?#\\|^\\.$\\|^\\.\\.$\\|^\\.tern.+$"))
+  (setq dired-listing-switches "-alh")
+
   ;; Gnus
   (setq gnus-secondary-select-methods
         '(
