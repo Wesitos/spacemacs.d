@@ -361,8 +361,11 @@ you should place you code here."
   ;; Load Dired X when Dired is loaded.
   (require 'dired-x)
   (setq-default dired-omit-files-p t) ; Buffer-local variable
-  (setq dired-omit-files (concat "^\\.?#\\|^\\.$\\|^\\.\\.$\\|^\\.tern.+$"))
-  (setq dired-listing-switches "-alh")
+  (setq
+   dired-omit-files (concat "^\\.?#\\|^\\.$\\|^\\.\\.$\\|^\\.tern-port$")
+   dired-omit-verbose nil
+   dired-listing-switches "-alh"
+   )
 
   ;; Gnus
   (setq gnus-secondary-select-methods
