@@ -345,7 +345,7 @@ you should place you code here."
 
   ;; GPG related options
   (setq
-   magit-commit-arguments '("--gpg-sign=75D9D625ABF40969")
+   magit-commit-arguments '("-S")
    magit-log-arguments '("--graph" "--decorate" "--show-signature" "-n256")
    )
 
