@@ -42,7 +42,7 @@ values."
      clojure
      emacs-lisp
      major-modes
-     javascript
+     (javascript :variables javascript-disable-tern-port-files nil)
      python
      ruby
      (sql :variables sql-capitalize-keywords t)
