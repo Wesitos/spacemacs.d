@@ -548,9 +548,11 @@ you should place you code here."
   ;; GraphQL
   (use-package graphql-mode
     :ensure t
-    :diminish graphql-mode
     :mode "\\.graphql\\'"
+    :init
+    (spacemacs|diminish graphql-mode "⬡" "g")
     )
+
   (setq-default
    flycheck-eslintrc ".eslintrc*")
 
