@@ -517,7 +517,6 @@ you should place you code here."
    js2-mode-show-strict-warnings nil
    js2-mode-show-parse-errors nil
    )
-
   ;; https://emacs.stackexchange.com/questions/21205/flycheck-with-file-relative-eslint-executable
   (defun use-linter-from-node-modules (linter-name exec-path)
     (let* ((root (locate-dominating-file

@@ -80,7 +80,7 @@ Each entry is either:
                 ))
     :config
     (progn
-      (spacemacs|diminish platformio-mode " ⒫" " p"))
+      (spacemacs|diminish platformio-mode " 👽" " p"))
     ))
 
 (defun platformio/init-irony ()
@@ -100,7 +100,8 @@ Each entry is either:
 (defun platformio/post-init-company ())
 
 (defun platformio/post-init-projectile ()
-  (add-to-list 'projectile-project-root-files "platformio.ini")
+  (with-eval-after-load 'projectile
+      (add-to-list 'projectile-project-root-files "platformio.ini"))
   )
 
 (when (configuration-layer/layer-usedp 'auto-completion)
