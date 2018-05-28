@@ -26,7 +26,7 @@ values."
                       auto-completion-tab-key-behavior 'complete
                       auto-completion-enable-snippets-in-popup t
                       auto-completion-enable-help-tooltip t
-                      auto-completion-complete-with-key-sequence-delay 0.2
+                      auto-completion-complete-with-key-sequence-delay 0.1
                       auto-completion-enable-sort-by-usage t)
      syntax-checking
      (spell-checking :variables
@@ -42,7 +42,9 @@ values."
      clojure
      emacs-lisp
      major-modes
-     (javascript :variables javascript-disable-tern-port-files nil)
+     (javascript
+      :variables javascript-disable-tern-port-files nil
+      node-add-modules-path t)
      python
      ruby
      (sql :variables sql-capitalize-keywords t)
@@ -62,6 +64,7 @@ values."
      ;; Documents
      latex
      bibtex
+     restructuredtext
 
      ;; Web
      html
@@ -93,12 +96,15 @@ values."
    ;; configuration in `dotspacemacs/user-config'.
    dotspacemacs-additional-packages
    '(
+     add-node-modules-path
+     js-comint
      editorconfig
      graphql-mode
      (yasnippet :location elpa)
+     gnus-desktop-notify
      )
    ;; A list of packages and/or extensions that will not be install and loaded.
-   dotspacemacs-excluded-packages '()
+   dotspacemacs-excluded-packages '(auto-complete-rst)
    ;; If non-nil spacemacs will delete any orphan packages, i.e. packages that
    ;; are declared in a layer which is not a member of
    ;; the list `dotspacemacs-configuration-layers'. (default t)
@@ -173,10 +179,10 @@ values."
    ;; Default font. `powerline-Scale' Allows to quickly tweak the mode-line
    ;; size to make separators look not too crappy.
    dotspacemacs-default-font '("Fira Mono"
-                              :size 13
-                              :weight normal
-                              :width normal
-                              :powerline-scale 1.0)
+                               :size 13
+                               :weight normal
+                               :width normal
+                               :powerline-scale 1.0)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The key used for Emacs commands (M-x) (after pressing on the leader key).
@@ -213,7 +219,7 @@ values."
    dotspacemacs-display-default-layout nil
    ;; If non nil then the last auto saved layouts are resume automatically upon
    ;; start. (default nil)
-   dotspacemacs-auto-resume-layouts t
+   dotspacemacs-auto-resume-layouts nil
    ;; Size (in MB) above which spacemacs will prompt to open the large file
    ;; literally to avoid performance issues. Opening a file literally means that
    ;; no major mode or minor modes are active. (default is 1)
@@ -329,6 +335,7 @@ before packages are loaded. If you are unsure, you should try in setting them in
    custom-file "~/.spacemacs.d/.custom-settings"
    ;; Avoid using helm when completing at point
    ;; helm-mode-handle-completion-in-region nil
+   gnus-init-file "~/.spacemacs.d/gnus.el"
    ))
 
 (defun dotspacemacs/user-config ()
@@ -363,37 +370,53 @@ you should place you code here."
   (setq
    dired-omit-files (concat "^\\.?#\\|^\\.$\\|^\\.\\.$\\|^\\.tern-port$")
    dired-omit-verbose nil
-   dired-listing-switches "-alh"
+   dired-listing-switches "-alh --group-directories-first"
    )
 
   ;; Gnus
   (setq gnus-secondary-select-methods
         '(
-          (nnimap "mkl-mail"
+          (nnimap "mkl"
                   (nnimap-address
                    "imap.makerlabperu.org")
                   (nnimap-inbox "INBOX")
                   (nnimap-server-port "imaps")
-                  (nnimap-stream ssl))
+                  (nnimap-server-port 993)
+                  (nnimap-stream ssl)
+                  (nnir-search-engine imap))
           ))
+
+  (setq gnus-asynchronous t
+        gnus-use-cache t
+        gnus-read-active-file 'some)
+
+  (setq gnus-thread-sort-functions
+        '(gnus-thread-sort-by-most-recent-date
+          (not gnus-thread-sort-by-number)))
 
   ;; Outbound server
   (setq message-send-mail-function 'smtpmail-send-it
         smtpmail-default-smtp-server "smtp.makerlabperu.org")
 
   (setq gnus-message-archive-method '(nnimap "imap.makerlabperu.org")
-        gnus-message-archive-group "[MKL]/Sent Mail")
+        gnus-message-archive-group "Enviados")
 
   ;; set return email address based on incoming email address
   (setq gnus-posting-styles
         '(((header "to" "wesitos@makerlabperu.org")
            (address "wesitos@makerlabperu.org"))
-          (((header "to" "admin@makerlabperu.org")
-            (address "admin@makerlabperu.org")))
-          ))
+          ((header "to" "admin@makerlabperu.org")
+           (address "admin@makerlabperu.org"))
+          ((header "to" "admision@makerlabperu.org")
+           (address "admision@makerlabperu.org"))))
 
-  (setq nnml-directory "~/mail/gnus/")
+  (setq nnmh-directory "~/mail/gnus/")
   (setq message-directory "~/mail/gnus/")
+
+  (add-hook 'gnus-article-mode-hook
+            (lambda ()
+              (face-remap-add-relative 'default :size 16)
+  ))
 
   ;; set-mark bug on emacs 25.1 workaround... in theory
   (require 'ansible-doc)
@@ -406,7 +429,6 @@ you should place you code here."
       (kbd "<tab>") 'company-indent-or-complete-common)
     )
 
-  (with-eval-after-load "js2")
 
   ;; Ispell config
   (with-eval-after-load "ispell"
@@ -419,25 +441,24 @@ you should place you code here."
 
   ;; File lookup
   (use-package helm-projectile
-    :defer t
-    :commands (helm-overlord)
-    :init
-    (global-set-key (kbd "C-c o") 'helm-for-files)
+    :bind ("C-c o" . helm-overlord)
     :config
     (progn
-      (setq helm-for-files-preferred-list
-            '(helm-source-buffers-list
-              helm-source-projectile-projects
-              helm-source-projectile-buffers-list
-              helm-source-projectile-files-list
-              helm-source-recentf
-              helm-source-bookmarks
-              helm-source-file-cache
-              helm-source-files-in-current-dir
-              helm-source-locate
-              ))
-      )
-    )
+      (require 'helm-x-files)
+      (defun helm-overlord ()
+        (interactive)
+        (helm :sources
+              '(helm-source-buffers-list
+                helm-source-projectile-buffers-list
+                helm-source-projectile-files-list
+                helm-source-projectile-projects
+                helm-source-recentf
+                helm-source-file-cache
+                )
+              :ff-transformer-show-only-basename nil
+              :buffer "*helm-overlord*"
+              :truncate-lines helm-buffers-truncate-lines
+              ))))
 
   ;; Org config
   ;; Fontify org-mode code blocks
@@ -518,33 +539,51 @@ you should place you code here."
    js-switch-indent-offset 2
    js2-mode-show-strict-warnings nil
    js2-mode-show-parse-errors nil
+   js-expr-indent-offset 0
+   js-paren-indent-offset 0
+   json-reformat:indent-width 2
    )
-  ;; https://emacs.stackexchange.com/questions/21205/flycheck-with-file-relative-eslint-executable
-  (defun use-linter-from-node-modules (linter-name exec-path)
-    (let* ((root (locate-dominating-file
-                  (or (buffer-file-name) default-directory)
-                  "node_modules"))
-           (linter (and root
-                        (expand-file-name
-                         (concat (file-name-as-directory "node_modules")
-                                 exec-path)
-                         root))))
-      (when (and linter (file-executable-p linter))
-        (set (make-local-variable
-              (intern (concat "flycheck-" linter-name "-executable"))) linter))))
-  (defun use-eslint-from-node-modules ()
-    (use-linter-from-node-modules
-     "javascript-eslint"
-     ".bin/eslint"))
-  ;; ESlint
-  (add-hook 'js2-mode-hook 'use-eslint-from-node-modules)
-  (add-hook 'react-mode-hook 'use-eslint-from-node-modules)
+
+  ;; Add .mjs extension autoload
+  (add-to-list 'auto-mode-alist '("\\.mjs\\'" . js2-mode))
+
+  ;; json-mode by default locally sets indent-level to 4
+  (add-hook 'json-mode-hook
+            (lambda ()
+              (make-local-variable 'js-indent-level)
+              (setq js-indent-level 2)))
+
+  (advice-add
+   'js--multi-line-declaration-indentation
+   :around (lambda (orig-fun &rest args) nil))
+
+  (advice-add 'js--proper-indentation :override 'js--proper-indentation-custom)
+
+  (use-package js-comint
+    :ensure t
+    :init
+    (progn
+      (defun inferior-js-mode-hook-setup ()
+        (add-hook 'comint-output-filter-functions 'js-comint-process-output))
+      (add-hook 'inferior-js-mode-hook 'inferior-js-mode-hook-setup t)
+      (add-hook 'js2-mode-hook
+                (lambda ()
+                  (let ((bindlist
+                         '(("C-c c" . 'js-send-last-sexp)
+                           ("C-c C-b" . 'js-send-buffer)
+                           ("C-c C-f" . 'js-load-file))))
+                    (dolist (pair bindlist)
+                      (local-set-key (kbd (car pair)) (cdr pair)))))))
+    )
 
   (add-hook 'scss-mode-hook
             (lambda ()
               (use-linter-from-node-modules
                "sass/scss-sass-lint"
                "sass-lint/bin/sass-lint.js")))
+
+  (add-hook 'web-mode-hook 'rainbow-mode)
+  (add-hook 'js2-mode-hook 'rainbow-mode)
 
   ;; GraphQL
   (use-package graphql-mode
@@ -590,8 +629,6 @@ you should place you code here."
                     (pipenv-mode)))
       ))
 
-  (use-package importmagie
-   )
   (spacemacs|diminish anaconda-mode "🐍" "a")
   ;; Matlab
   (setq-default
@@ -657,3 +694,70 @@ you should place you code here."
      (ispell-dictionary . "castellano")
      (ispell-dictionary . "english")))
   )
+
+
+(defun js--proper-indentation-custom (parse-status)
+  "Return the proper indentation for the current line."
+  (save-excursion
+    (back-to-indentation)
+    (cond ((nth 4 parse-status)    ; inside comment
+           (js--get-c-offset 'c (nth 8 parse-status)))
+          ((nth 3 parse-status) 0) ; inside string
+          ((eq (char-after) ?#) 0)
+          ((save-excursion (js--beginning-of-macro)) 4)
+          ;; Indent array comprehension continuation lines specially.
+          ((let ((bracket (nth 1 parse-status))
+                 beg)
+             (and bracket
+                  (not (js--same-line bracket))
+                  (setq beg (js--indent-in-array-comp bracket))
+                  ;; At or after the first loop?
+                  (>= (point) beg)
+                  (js--array-comp-indentation bracket beg))))
+          ((js--ctrl-statement-indentation))
+          ((nth 1 parse-status)
+           ;; A single closing paren/bracket should be indented at the
+           ;; same level as the opening statement. Same goes for
+           ;; "case" and "default".
+           (let ((same-indent-p (looking-at "[]})]"))
+                 (switch-keyword-p (looking-at "default\\_>\\|case\\_>[^:]"))
+                 (continued-expr-p (js--continued-expression-p))
+                 (original-point (point))
+                 (open-symbol (nth 1 parse-status)))
+             (goto-char (nth 1 parse-status)) ; go to the opening char
+             (skip-syntax-backward " ")
+             (when (eq (char-before) ?\)) (backward-list))
+             (back-to-indentation)
+             (js--maybe-goto-declaration-keyword-end parse-status)
+             (let* ((in-switch-p (unless same-indent-p
+                                   (looking-at "\\_<switch\\_>")))
+                    (same-indent-p (or same-indent-p
+                                       (and switch-keyword-p
+                                            in-switch-p)))
+                    (indent
+                     (cond (same-indent-p
+                            (current-column))
+                           (continued-expr-p
+                            (goto-char original-point)
+                            ;; Go to beginning line of continued expression.
+                            (while (js--continued-expression-p)
+                              (forward-line -1))
+                            ;; Go to the open symbol if it appears later.
+                            (when (> open-symbol (point))
+                              (goto-char open-symbol))
+                            (back-to-indentation)
+                            (+ (current-column)
+                               js-indent-level
+                               js-expr-indent-offset))
+                           (t
+                            (+ (current-column) js-indent-level
+                               (pcase (char-after (nth 1 parse-status))
+                                 (?\( js-paren-indent-offset)
+                                 (?\[ js-square-indent-offset)
+                                 (?\{ js-curly-indent-offset)))))))
+               (if in-switch-p
+                   (+ indent js-switch-indent-offset)
+                 indent))))
+          ((js--continued-expression-p)
+           (+ js-indent-level js-expr-indent-offset))
+          (t 0))))
