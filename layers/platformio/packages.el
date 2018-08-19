@@ -89,6 +89,7 @@ Each entry is either:
     :defer t
     :init
     (progn
+      (setq irony-additional-clang-options '("-std=c++11"))
       (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
       (spacemacs|diminish irony-mode " ⓘ" " i")
       )))

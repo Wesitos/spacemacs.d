@@ -38,13 +38,15 @@ values."
              colors-enable-rainbow-identifiers t)
 
      ;; Programming Languages
-     (c-c++ :variables c-c++-enable-clang-support t)
+     (c-c++ :variables
+            c-c++-default-mode-for-headers 'c++-mode)
      clojure
      emacs-lisp
      major-modes
      (javascript
-      :variables javascript-disable-tern-port-files nil
+      :variables javascript-backend 'tern
       node-add-modules-path t)
+     (tern :variables tern-disable-port-files nil)
      python
      ruby
      (sql :variables sql-capitalize-keywords t)
@@ -102,6 +104,7 @@ values."
      graphql-mode
      (yasnippet :location elpa)
      gnus-desktop-notify
+     exec-path-from-shell
      )
    ;; A list of packages and/or extensions that will not be install and loaded.
    dotspacemacs-excluded-packages '(auto-complete-rst)
@@ -336,7 +339,10 @@ before packages are loaded. If you are unsure, you should try in setting them in
    ;; Avoid using helm when completing at point
    ;; helm-mode-handle-completion-in-region nil
    gnus-init-file "~/.spacemacs.d/gnus.el"
-   ))
+   )
+  (add-to-list 'default-frame-alist
+               '(font . "-ADBE-Fira Mono-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1"))
+  )
 
 (defun dotspacemacs/user-config ()
   "Configuration function for user code.
@@ -354,6 +360,19 @@ you should place you code here."
    magit-commit-arguments '("-S")
    magit-log-arguments '("--graph" "--decorate" "--show-signature" "-n256")
    )
+
+  ;; Exec-path-from-shell
+  (setq
+   exec-path-from-shell-variables '(
+                                    "PATH"
+                                    "MANPATH"
+                                    "SSH_AUTHSOCK"
+                                    "WORKON_HOME"
+                                    "PYENV_ROOT"
+                                    "PIPENV_DEFAULT_PYTHON_VERSION"
+                                    ))
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize))
 
   ;; Mode line
   (setq
@@ -394,6 +413,18 @@ you should place you code here."
         '(gnus-thread-sort-by-most-recent-date
           (not gnus-thread-sort-by-number)))
 
+  (defun th/message-send-and-exit-multiple (addresses)
+    (interactive (list (split-string (read-string "Adresses: ")
+                                     "," t "[[:space:]]")))
+    (while addresses
+      (let ((address (car addresses)))
+        (setq addresses (cdr addresses))
+        (message-remove-header "To")
+        (message-add-header (format "To: %s" address))
+        (if addresses
+            (message-send)
+          (message-send)))))
+
   ;; Outbound server
   (setq message-send-mail-function 'smtpmail-send-it
         smtpmail-default-smtp-server "smtp.makerlabperu.org")
@@ -425,7 +456,7 @@ you should place you code here."
   (with-eval-after-load "company"
     (define-key spacemacs-js2-mode-map-root-map
       (kbd "<tab>") 'company-indent-or-complete-common)
-    (define-key spacemacs-react-mode-map-root-map
+    (define-key spacemacs-rjsx-mode-map-root-map
       (kbd "<tab>") 'company-indent-or-complete-common)
     )
 
@@ -440,10 +471,12 @@ you should place you code here."
   (list-load-path-shadows)
 
   ;; File lookup
-  (use-package helm-projectile
+  (use-package helm
+    :defer nil
     :bind ("C-c o" . helm-overlord)
     :config
     (progn
+      (require 'helm-projectile)
       (require 'helm-x-files)
       (defun helm-overlord ()
         (interactive)
@@ -459,6 +492,11 @@ you should place you code here."
               :buffer "*helm-overlord*"
               :truncate-lines helm-buffers-truncate-lines
               ))))
+
+  (use-package projectile
+    :config
+    (add-to-list 'projectile-globally-ignored-directories "node_modules")
+    )
 
   ;; Org config
   ;; Fontify org-mode code blocks
@@ -546,6 +584,7 @@ you should place you code here."
 
   ;; Add .mjs extension autoload
   (add-to-list 'auto-mode-alist '("\\.mjs\\'" . js2-mode))
+  (add-to-list 'auto-mode-alist '("\\.tern-project\\'" . json-mode))
 
   ;; json-mode by default locally sets indent-level to 4
   (add-hook 'json-mode-hook
@@ -585,6 +624,31 @@ you should place you code here."
   (add-hook 'web-mode-hook 'rainbow-mode)
   (add-hook 'js2-mode-hook 'rainbow-mode)
 
+  (use-package mmm-mode
+    :defer t
+    :init
+    (setq mmm-global-mode 'maybe
+          mmm-parse-when-idle t
+          )
+    :config
+    (progn
+      (mmm-add-classes
+       '((rjsx-graphql
+          :submode graphql-mode
+          :front "\bgql`"
+          :back "`"
+          ))
+       )
+      (mmm-add-mode-ext-class 'rjsx-mode nil 'rjsx-graphql)
+      )
+    )
+
+  (use-package rjsx-mode
+    :defer t
+    :config
+    (require 'mmm-mode)
+    )
+
   ;; GraphQL
   (use-package graphql-mode
     :ensure t
@@ -614,6 +678,10 @@ you should place you code here."
       (unbind-key "<emacs-state> <tab>" emmet-mode-keymap)))
 
   ;; Python
+  (setq
+   flycheck-python-flake8-executable "python3"
+   flycheck-python-pylint-executable "python3"
+   )
 
   (use-package pipenv
     :defer t
@@ -677,6 +745,12 @@ you should place you code here."
                     (split-window-horizontally)
                     (other-window 1)))
   (delete-selection-mode t)
+
+  ;; Wakatime
+  (setq
+   wakatime-cli-path "~/.pyenv/shims/wakatime"
+   wakatime-python-bin nil
+   )
 
   (global-wakatime-mode t)
   (spacemacs|diminish wakatime-mode "🕑" "w")
