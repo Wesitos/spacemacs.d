@@ -340,6 +340,8 @@ before packages are loaded. If you are unsure, you should try in setting them in
    ;; helm-mode-handle-completion-in-region nil
    gnus-init-file "~/.spacemacs.d/gnus.el"
    )
+
+  ;; Workaround for: https://github.com/syl20bnr/spacemacs/issues/10894
   (add-to-list 'default-frame-alist
                '(font . "-ADBE-Fira Mono-normal-normal-normal-*-13-*-*-*-m-0-iso10646-1"))
   )
