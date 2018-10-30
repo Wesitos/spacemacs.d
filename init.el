@@ -26,7 +26,6 @@ values."
                       auto-completion-tab-key-behavior 'complete
                       auto-completion-enable-snippets-in-popup t
                       auto-completion-enable-help-tooltip t
-                      auto-completion-complete-with-key-sequence-delay 0.1
                       auto-completion-enable-sort-by-usage t)
      syntax-checking
      (spell-checking :variables
@@ -39,7 +38,10 @@ values."
 
      ;; Programming Languages
      (c-c++ :variables
-            c-c++-default-mode-for-headers 'c++-mode)
+            c-c++-default-mode-for-headers 'c++-mode
+            c-c++-enable-clang-support t
+            c-c++-enable-rtags-support t
+            )
      clojure
      emacs-lisp
      major-modes
@@ -373,8 +375,7 @@ you should place you code here."
                                     "PYENV_ROOT"
                                     "PIPENV_DEFAULT_PYTHON_VERSION"
                                     ))
-  (when (memq window-system '(mac ns x))
-    (exec-path-from-shell-initialize))
+  (exec-path-from-shell-initialize)
 
   ;; Mode line
   (setq
@@ -393,6 +394,19 @@ you should place you code here."
    dired-omit-verbose nil
    dired-listing-switches "-alh --group-directories-first"
    )
+
+  ;; Custom layouts
+
+  (spacemacs|define-custom-layout "@dotfiles"
+    :binding "d"
+    :body
+    (progn
+      (dired "~/dotfiles")
+      (split-window-horizontally)
+      (other-window 1)
+      (dired "~/dotfiles/dispatch")
+      )
+    )
 
   ;; Gnus
   (setq gnus-secondary-select-methods
@@ -449,7 +463,9 @@ you should place you code here."
   (add-hook 'gnus-article-mode-hook
             (lambda ()
               (face-remap-add-relative 'default :size 16)
-  ))
+              ))
+
+  (global-prettify-symbols-mode 1)
 
   ;; set-mark bug on emacs 25.1 workaround... in theory
   (require 'ansible-doc)
@@ -584,6 +600,29 @@ you should place you code here."
    json-reformat:indent-width 2
    )
 
+  ;; Custom flycheck eslint configuration
+  (use-package flycheck
+    :defer t
+    :config
+    (flycheck-define-checker javascript-eslint
+      "A Javascript syntax and style checker using eslint.
+     See URL `https://eslint.org/'."
+      :command ("eslint" "--format=json"
+                (option-list "--rulesdir" flycheck-eslint-rules-directories)
+                (eval flycheck-eslint-args)
+                "--stdin" "--stdin-filename"
+                (eval (file-relative-name
+                       (car (flycheck-substitute-argument
+                             'source-original 'javascript-eslint))
+                       (flycheck-eslint--find-working-directory nil)
+                       )))
+      :standard-input t
+      :error-parser flycheck-parse-eslint
+      ;; :enabled (lambda () (flycheck-eslint-config-exists-p))
+      :modes (js-mode js-jsx-mode js2-mode js2-jsx-mode js3-mode rjsx-mode)
+      :working-directory flycheck-eslint--find-working-directory)
+    )
+
   ;; Add .mjs extension autoload
   (add-to-list 'auto-mode-alist '("\\.mjs\\'" . js2-mode))
   (add-to-list 'auto-mode-alist '("\\.tern-project\\'" . json-mode))
@@ -659,9 +698,6 @@ you should place you code here."
     (spacemacs|diminish graphql-mode "⬡" "g")
     )
 
-  (setq-default
-   flycheck-eslintrc ".eslintrc*")
-
   ;; Web-mode
   (setq-default
    css-indent-offset 2
@@ -683,6 +719,8 @@ you should place you code here."
   (setq
    flycheck-python-flake8-executable "python3"
    flycheck-python-pylint-executable "python3"
+   pipenv-with-flycheck t
+   pipenv-with-projectile t
    )
 
   (use-package pipenv
@@ -700,12 +738,14 @@ you should place you code here."
       ))
 
   (spacemacs|diminish anaconda-mode "🐍" "a")
+
   ;; Matlab
   (setq-default
-   pipenv-with-flycheck t
-   pipenv-with-projectile t
    matlab-shell-command-switches '("-nodesktop" "-nosplash")
    )
+
+  ;; Latex
+  (add-hook 'LaTeX-mode-hook 'visual-line-mode)
 
   ;; Expand Region
   (setq-default
@@ -768,9 +808,9 @@ you should place you code here."
                                (("bgcolor" "MonokaiBg")))
      (ispell-dictionary . "castellano,english")
      (ispell-dictionary . "castellano")
-     (ispell-dictionary . "english")))
+     (ispell-dictionary . "english"))
+   )
   )
-
 
 (defun js--proper-indentation-custom (parse-status)
   "Return the proper indentation for the current line."
